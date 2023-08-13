@@ -114,22 +114,6 @@ BOOL CChartGameDlg::OnInitDialog()
 	m_ChartCtrl.ShowMouseCursor(false);
 	CChartCrossHairCursor* pCrossHair = m_ChartCtrl.CreateCrossHairCursor();
 
-	/// 라인차트 파트
-	CChartXYSerie* pSeries = nullptr;
-	pSeries = m_ChartCtrl.CreateLineSerie();
-
-	double XVal[50];
-	double YVal[50];
-	for (int i = 0; i < 50; i++)
-	{
-		COleDateTime date(2017, 6, 1, 0, 0, 0);
-		XVal[i] = CChartCtrl::DateToValue(date) + i * 16;
-		YVal[i] = sin(i) * 5000 + 47000;
-	}
-	pSeries->SetPoints(XVal, YVal, 50);
-	pSeries->SetColor(RGB(255, 0, 0));
-	pSeries->CreateBalloonLabel(5, _T("This is a sin curve"));
-
 	/// 봉차트 파트
 	CChartCandlestickSerie* pCandle = nullptr;
 	pCandle = m_ChartCtrl.CreateCandlestickSerie();
@@ -139,7 +123,7 @@ BOOL CChartGameDlg::OnInitDialog()
 
 	pCandle->SetPoints(pCandlePoint, 600);
 	pCandle->SetColor(RGB(0, 255, 0));
-	pCandle->CreateBalloonLabel(5, _T("This is a candle"));
+	// pCandle->CreateBalloonLabel(5, _T("This is a candle"));
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
