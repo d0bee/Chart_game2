@@ -12,6 +12,8 @@
 #define new DEBUG_NEW
 #endif
 
+using namespace std;
+
 
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
 
@@ -102,6 +104,43 @@ BOOL CChartGameDlg::OnInitDialog()
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 
+	/// 초기화
+	CChartDateTimeAxis* pBottomAxis = m_ChartCtrl.CreateDateTimeAxis(CChartCtrl::BottomAxis);
+	CChartStandardAxis* pLeftAxis = m_ChartCtrl.CreateStandardAxis(CChartCtrl::LeftAxis);
+	pLeftAxis->SetAutomaticMode(CChartAxis::FullAutomatic);		
+	pBottomAxis->SetAutomaticMode(CChartAxis::FullAutomatic);
+
+	pBottomAxis->SetDiscrete(false);
+	m_ChartCtrl.ShowMouseCursor(false);
+	CChartCrossHairCursor* pCrossHair = m_ChartCtrl.CreateCrossHairCursor();
+
+	/// 라인차트 파트
+	CChartXYSerie* pSeries = nullptr;
+	pSeries = m_ChartCtrl.CreateLineSerie();
+
+	double XVal[50];
+	double YVal[50];
+	for (int i = 0; i < 50; i++)
+	{
+		COleDateTime date(2017, 6, 1, 0, 0, 0);
+		XVal[i] = CChartCtrl::DateToValue(date) + i * 16;
+		YVal[i] = sin(i) * 5000 + 47000;
+	}
+	pSeries->SetPoints(XVal, YVal, 50);
+	pSeries->SetColor(RGB(255, 0, 0));
+	pSeries->CreateBalloonLabel(5, _T("This is a sin curve"));
+
+	/// 봉차트 파트
+	CChartCandlestickSerie* pCandle = nullptr;
+	pCandle = m_ChartCtrl.CreateCandlestickSerie();
+	SChartCandlestickPoint pCandlePoint[600];
+
+	ReadData(pCandlePoint);
+
+	pCandle->SetPoints(pCandlePoint, 600);
+	pCandle->SetColor(RGB(0, 255, 0));
+	pCandle->CreateBalloonLabel(5, _T("This is a candle"));
+
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -145,6 +184,42 @@ void CChartGameDlg::OnPaint()
 	{
 		CDialogEx::OnPaint();
 	}
+}
+
+void CChartGameDlg::ReadData(SChartCandlestickPoint(&pCandlePoint)[600])
+{
+	UpdateData(TRUE);
+
+	//@ 파일에서 데이터 불러오기
+	// 파일열기
+	CStringA strCSVfileName = (CStringA)theApp.m_sAppPath + L"\\data\\testdata.csv";
+	char* BufOfFileName = strCSVfileName.GetBuffer(strCSVfileName.GetLength());
+	FILE* f = nullptr;
+	errno_t err;
+
+	err = fopen_s(&f, BufOfFileName, "rt");	//읽기모드
+	if (err || f == NULL)
+	{
+		AfxMessageBox(L"파일열기 실패");
+		return;
+	}
+
+	double temp;
+	int year, month, day;
+	for (int i = 0; i < 600; i++)
+	{
+		fscanf_s(f, "%4d%2d%2d,%lf,%lf,%lf,%lf,%lf\n",	//  날짜, 시가, 종가, 고가, 저가, 거래량
+			&year, &month, &day,
+			&pCandlePoint[i].Open,
+			&pCandlePoint[i].Close,
+			&pCandlePoint[i].High,
+			&pCandlePoint[i].Low,
+			&temp);
+
+		COleDateTime date(year, month, day, 0, 0, 0);
+		pCandlePoint[i].XVal = CChartCtrl::DateToValue(date);
+	}
+	fclose(f);				//파일 닫기
 }
 
 // 사용자가 최소화된 창을 끄는 동안에 커서가 표시되도록 시스템에서

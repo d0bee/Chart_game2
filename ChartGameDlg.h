@@ -4,6 +4,8 @@
 
 #pragma once
 #include "ChartCtrl.h"
+#include "ChartLineSerie.h"
+#include "ChartCandlestickSerie.h"
 
 // CChartGameDlg 대화 상자
 class CChartGameDlg : public CDialogEx
@@ -11,6 +13,11 @@ class CChartGameDlg : public CDialogEx
 // 생성입니다.
 public:
 	CChartGameDlg(CWnd* pParent = nullptr);	// 표준 생성자입니다.
+
+	CChartLineSerie* pSeries;
+	CChartCandlestickSerie* pCandle;
+
+	void ReadData(SChartCandlestickPoint(&pCandlePoint)[600]);
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
