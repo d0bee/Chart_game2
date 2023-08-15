@@ -62,12 +62,14 @@ void CChartGameDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_CHARTCTRL, m_ChartCtrl);
+	DDX_Control(pDX, IDC_NEXT, CNext);
 }
 
 BEGIN_MESSAGE_MAP(CChartGameDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_BN_CLICKED(IDC_NEXT, &CChartGameDlg::OnBnClickedNext)
 END_MESSAGE_MAP()
 
 
@@ -110,7 +112,6 @@ BOOL CChartGameDlg::OnInitDialog()
 	pLeftAxis->SetAutomaticMode(CChartAxis::FullAutomatic);		
 	pBottomAxis->SetAutomaticMode(CChartAxis::FullAutomatic);
 
-	pBottomAxis->SetDiscrete(false);
 	m_ChartCtrl.ShowMouseCursor(false);
 	CChartCrossHairCursor* pCrossHair = m_ChartCtrl.CreateCrossHairCursor();
 
@@ -213,3 +214,7 @@ HCURSOR CChartGameDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+void CChartGameDlg::OnBnClickedNext()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
