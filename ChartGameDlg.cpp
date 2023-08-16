@@ -17,7 +17,7 @@ using namespace std;
 // 캔들 조작용
 CChartCandlestickSerie* pCandle = nullptr;
 SChartCandlestickPoint pCandlePoint[600];
-
+int cnt;
 
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
 
@@ -67,6 +67,7 @@ void CChartGameDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_CHARTCTRL, m_ChartCtrl);
 	DDX_Control(pDX, IDC_NEXT, CNext);
+	DDX_Control(pDX, IDC_COUNT, mCount);
 }
 
 BEGIN_MESSAGE_MAP(CChartGameDlg, CDialogEx)
@@ -209,8 +210,12 @@ HCURSOR CChartGameDlg::OnQueryDragIcon()
 
 void CChartGameDlg::OnBnClickedNext()
 {
+	CString str;
+	str.Format(_T("%d"), ++cnt);
+
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	pCandle->SetPoints(pCandlePoint, 600);
+	pCandle->SetPoints(pCandlePoint, 100+(cnt));
+	mCount.SetWindowTextW(str);
 }
 
 void CChartGameDlg::OnBnClickedGo()
@@ -223,5 +228,7 @@ void CChartGameDlg::OnBnClickedGo()
 
 	pCandle->SetPoints(pCandlePoint, 100);
 	pCandle->SetColor(RGB(0, 255, 0));
+
+	cnt = 0;
 	// pCandle->CreateBalloonLabel(5, _T("This is a candle"));
 }
