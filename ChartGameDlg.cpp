@@ -70,6 +70,7 @@ BEGIN_MESSAGE_MAP(CChartGameDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_NEXT, &CChartGameDlg::OnBnClickedNext)
+	ON_BN_CLICKED(IDC_GO, &CChartGameDlg::OnBnClickedGo)
 END_MESSAGE_MAP()
 
 
@@ -105,26 +106,14 @@ BOOL CChartGameDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
-
 	/// 초기화
 	CChartDateTimeAxis* pBottomAxis = m_ChartCtrl.CreateDateTimeAxis(CChartCtrl::BottomAxis);
 	CChartStandardAxis* pLeftAxis = m_ChartCtrl.CreateStandardAxis(CChartCtrl::LeftAxis);
-	pLeftAxis->SetAutomaticMode(CChartAxis::FullAutomatic);		
+	pLeftAxis->SetAutomaticMode(CChartAxis::FullAutomatic);
 	pBottomAxis->SetAutomaticMode(CChartAxis::FullAutomatic);
 
 	m_ChartCtrl.ShowMouseCursor(false);
 	CChartCrossHairCursor* pCrossHair = m_ChartCtrl.CreateCrossHairCursor();
-
-	/// 봉차트 파트
-	CChartCandlestickSerie* pCandle = nullptr;
-	pCandle = m_ChartCtrl.CreateCandlestickSerie();
-	SChartCandlestickPoint pCandlePoint[600];
-
-	ReadData(pCandlePoint);
-
-	pCandle->SetPoints(pCandlePoint, 600);
-	pCandle->SetColor(RGB(0, 255, 0));
-	// pCandle->CreateBalloonLabel(5, _T("This is a candle"));
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -217,4 +206,21 @@ HCURSOR CChartGameDlg::OnQueryDragIcon()
 void CChartGameDlg::OnBnClickedNext()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	
+}
+
+
+void CChartGameDlg::OnBnClickedGo()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	/// 봉차트 파트
+	CChartCandlestickSerie* pCandle = nullptr;
+	pCandle = m_ChartCtrl.CreateCandlestickSerie();
+	SChartCandlestickPoint pCandlePoint[600];
+
+	ReadData(pCandlePoint);
+
+	pCandle->SetPoints(pCandlePoint, 100);
+	pCandle->SetColor(RGB(0, 255, 0));
+	// pCandle->CreateBalloonLabel(5, _T("This is a candle"));
 }
