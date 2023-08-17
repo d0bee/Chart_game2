@@ -20,7 +20,7 @@ using namespace std;
 
 // 캔들 조작용
 CChartCandlestickSerie* pCandle = nullptr;
-SChartCandlestickPoint pCandlePoint[600];
+SChartCandlestickPoint pCandlePoint[480];
 CButton* pBtn;
 
 // 차트 카운트 계산용 변수
@@ -32,7 +32,7 @@ int candlecnt;
 // 난수값을 얻기 위한 random_device
 std::random_device rd;
 std::mt19937 gen(rd());
-std::uniform_int_distribution<int> dis(1, 570);
+std::uniform_int_distribution<int> dis(1, 450);
 
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
 
@@ -84,6 +84,9 @@ void CChartGameDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_NEXT, CNext);
 	DDX_Control(pDX, IDC_COUNT, mCount);
 	DDX_Control(pDX, IDC_CLOSECOST, m_CloseCost);
+	DDX_Control(pDX, IDC_BUY, m_Buy);
+	DDX_Control(pDX, IDC_SELL, m_Sell);
+	DDX_Control(pDX, IDC_INPUT, m_Input);
 }
 
 BEGIN_MESSAGE_MAP(CChartGameDlg, CDialogEx)
@@ -174,13 +177,21 @@ void CChartGameDlg::OnPaint()
 	}
 }
 
-void CChartGameDlg::ReadData(SChartCandlestickPoint(pCandlePoint)[600])
+void CChartGameDlg::ReadData(SChartCandlestickPoint(pCandlePoint)[480])
 {
 	UpdateData(TRUE);
 
 	//@ 파일에서 데이터 불러오기
 	// 파일열기
-	CStringA strCSVfileName = (CStringA)theApp.m_sAppPath + L"\\data\\testdata.csv";
+	 
+	// 랜덤용 변수
+	CString str;
+	int random = dis(gen) % 5 + 1;
+	str.Format(_T("%d"), random);
+	
+	// 파일명 초기화 작업
+	CStringA strCSVfileName = "";
+	strCSVfileName = (CStringA)theApp.m_sAppPath + L"\\data\\testdata" + (CStringA)str + ".csv";
 	char* BufOfFileName = strCSVfileName.GetBuffer(strCSVfileName.GetLength());
 	FILE* f = nullptr;
 	errno_t err;
@@ -195,7 +206,7 @@ void CChartGameDlg::ReadData(SChartCandlestickPoint(pCandlePoint)[600])
 	double temp;
 	int year, month, day;
 
-	for (int i = 0; i < 600; i++)
+	for (int i = 0; i < 480; i++)
 	{
 		fscanf_s(f, "%4d%2d%2d,%lf,%lf,%lf,%lf,%lf\n",	//  날짜, 시가, 종가, 고가, 저가, 거래량
 			&year, &month, &day,
