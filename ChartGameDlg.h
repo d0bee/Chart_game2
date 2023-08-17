@@ -14,10 +14,9 @@ class CChartGameDlg : public CDialogEx
 public:
 	CChartGameDlg(CWnd* pParent = nullptr);	// 표준 생성자입니다.
 
-	CChartLineSerie* pSeries;
 	CChartCandlestickSerie* pCandle;
 
-	void ReadData(SChartCandlestickPoint(&pCandlePoint)[600]);
+	void ReadData(SChartCandlestickPoint(pCandlePoint)[600]);
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
@@ -40,4 +39,12 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	CChartCtrl m_ChartCtrl;
+	afx_msg void OnBnClickedButton1();
+	afx_msg void OnBnClickedNext();
+	CButton CNext;
+	afx_msg void OnBnClickedGo();
+	CStatic mCount;
+	afx_msg void OnStnClickedcandcnt();
+//	CStatic candcnt;
+	CStatic m_CloseCost;
 };

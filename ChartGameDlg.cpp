@@ -7,11 +7,14 @@
 #include "ChartGame.h"
 #include "ChartGameDlg.h"
 #include "afxdialogex.h"
-#include <cstdlib>
+#include <random>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+// 콘솔 디버깅용
+#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 
 using namespace std;
 
@@ -19,9 +22,17 @@ using namespace std;
 CChartCandlestickSerie* pCandle = nullptr;
 SChartCandlestickPoint pCandlePoint[600];
 CButton* pBtn;
+
+// 차트 카운트 계산용 변수
 int cnt;
+
+// 차트 랜덤 불러오기용 난수
 int candlecnt;
-int defaultcnt = -1;
+
+// 난수값을 얻기 위한 random_device
+std::random_device rd;
+std::mt19937 gen(rd());
+std::uniform_int_distribution<int> dis(1, 570);
 
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
 
@@ -72,6 +83,7 @@ void CChartGameDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CHARTCTRL, m_ChartCtrl);
 	DDX_Control(pDX, IDC_NEXT, CNext);
 	DDX_Control(pDX, IDC_COUNT, mCount);
+	DDX_Control(pDX, IDC_CLOSECOST, m_CloseCost);
 }
 
 BEGIN_MESSAGE_MAP(CChartGameDlg, CDialogEx)
@@ -162,7 +174,7 @@ void CChartGameDlg::OnPaint()
 	}
 }
 
-void CChartGameDlg::ReadData(SChartCandlestickPoint(&pCandlePoint)[600])
+void CChartGameDlg::ReadData(SChartCandlestickPoint(pCandlePoint)[600])
 {
 	UpdateData(TRUE);
 
@@ -182,6 +194,7 @@ void CChartGameDlg::ReadData(SChartCandlestickPoint(&pCandlePoint)[600])
 
 	double temp;
 	int year, month, day;
+
 	for (int i = 0; i < 600; i++)
 	{
 		fscanf_s(f, "%4d%2d%2d,%lf,%lf,%lf,%lf,%lf\n",	//  날짜, 시가, 종가, 고가, 저가, 거래량
@@ -195,6 +208,7 @@ void CChartGameDlg::ReadData(SChartCandlestickPoint(&pCandlePoint)[600])
 		COleDateTime date(year, month, day, 0, 0, 0);
 		pCandlePoint[i].XVal = CChartCtrl::DateToValue(date);
 	}
+
 	fclose(f);				//파일 닫기
 }
 
@@ -207,15 +221,23 @@ HCURSOR CChartGameDlg::OnQueryDragIcon()
 
 void CChartGameDlg::OnBnClickedNext()
 {
+	// 정수 변환용 str
 	CString str;
+
+	// 최대 cnt
 	int Max_cnt = 30;
+
+	// cost 표시용 str
+	CString cost;
 
 	if (cnt < Max_cnt) {
 		str.Format(_T("%d"), ++cnt);
 
-		// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 		pCandle->AddPoints(pCandlePoint, candlecnt + (cnt));
 		mCount.SetWindowTextW(str + "/30");
+
+		cost.Format(_T("%.0lf"), pCandlePoint[candlecnt - 1 + cnt].Close);
+		m_CloseCost.SetWindowTextW(cost);
 	}
 	
 	if (cnt==Max_cnt){
@@ -226,6 +248,9 @@ void CChartGameDlg::OnBnClickedNext()
 
 void CChartGameDlg::OnBnClickedGo()
 {
+	// 정수 변환용 str
+	CString str;
+
 	pBtn = (CButton*)GetDlgItem(IDC_NEXT);
 	pBtn->EnableWindow(TRUE);
 	mCount.SetWindowTextW(_T("0/30"));
@@ -235,19 +260,19 @@ void CChartGameDlg::OnBnClickedGo()
 	CChartStandardAxis* pLeftAxis = m_ChartCtrl.CreateStandardAxis(CChartCtrl::LeftAxis);
 	pLeftAxis->SetAutomaticMode(CChartAxis::FullAutomatic);
 	pBottomAxis->SetAutomaticMode(CChartAxis::FullAutomatic);
-
-
-	candlecnt = rand() % 570;
-
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	/// 봉차트 파트
+;
 	pCandle = m_ChartCtrl.CreateCandlestickSerie();
 	
+	candlecnt = dis(gen);
 	ReadData(pCandlePoint);
-
+	
 	pCandle->SetPoints(pCandlePoint, candlecnt);
 	pCandle->SetColor(RGB(0, 255, 0));
 
 	cnt = 0;
+
+	str.Format(_T("%.0lf"), pCandlePoint[candlecnt-1].Close);
+	m_CloseCost.SetWindowTextW(str);
+
 	// pCandle->CreateBalloonLabel(5, _T("This is a candle"));
 }
