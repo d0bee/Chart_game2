@@ -7,6 +7,7 @@
 #include "ChartGame.h"
 #include "ChartGameDlg.h"
 #include "afxdialogex.h"
+#include <cstdlib>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -17,7 +18,10 @@ using namespace std;
 // 캔들 조작용
 CChartCandlestickSerie* pCandle = nullptr;
 SChartCandlestickPoint pCandlePoint[600];
+CButton* pBtn;
 int cnt;
+int candlecnt;
+int defaultcnt = -1;
 
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
 
@@ -112,13 +116,6 @@ BOOL CChartGameDlg::OnInitDialog()
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 	/// 초기화
-	CChartDateTimeAxis* pBottomAxis = m_ChartCtrl.CreateDateTimeAxis(CChartCtrl::BottomAxis);
-	CChartStandardAxis* pLeftAxis = m_ChartCtrl.CreateStandardAxis(CChartCtrl::LeftAxis);
-	pLeftAxis->SetAutomaticMode(CChartAxis::FullAutomatic);
-	pBottomAxis->SetAutomaticMode(CChartAxis::FullAutomatic);
-
-	m_ChartCtrl.ShowMouseCursor(false);
-	CChartCrossHairCursor* pCrossHair = m_ChartCtrl.CreateCrossHairCursor();
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -211,22 +208,44 @@ HCURSOR CChartGameDlg::OnQueryDragIcon()
 void CChartGameDlg::OnBnClickedNext()
 {
 	CString str;
-	str.Format(_T("%d"), ++cnt);
+	int Max_cnt = 30;
 
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	pCandle->SetPoints(pCandlePoint, 100+(cnt));
-	mCount.SetWindowTextW(str);
+	if (cnt < Max_cnt) {
+		str.Format(_T("%d"), ++cnt);
+
+		// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+		pCandle->AddPoints(pCandlePoint, candlecnt + (cnt));
+		mCount.SetWindowTextW(str + "/30");
+	}
+	
+	if (cnt==Max_cnt){
+		mCount.SetWindowTextW(_T("END"));
+		pBtn->EnableWindow(FALSE);
+	}
 }
 
 void CChartGameDlg::OnBnClickedGo()
 {
+	pBtn = (CButton*)GetDlgItem(IDC_NEXT);
+	pBtn->EnableWindow(TRUE);
+	mCount.SetWindowTextW(_T("0/30"));
+	
+	m_ChartCtrl.RemoveAllSeries();
+	CChartDateTimeAxis* pBottomAxis = m_ChartCtrl.CreateDateTimeAxis(CChartCtrl::BottomAxis);
+	CChartStandardAxis* pLeftAxis = m_ChartCtrl.CreateStandardAxis(CChartCtrl::LeftAxis);
+	pLeftAxis->SetAutomaticMode(CChartAxis::FullAutomatic);
+	pBottomAxis->SetAutomaticMode(CChartAxis::FullAutomatic);
+
+
+	candlecnt = rand() % 570;
+
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	/// 봉차트 파트
 	pCandle = m_ChartCtrl.CreateCandlestickSerie();
 	
 	ReadData(pCandlePoint);
 
-	pCandle->SetPoints(pCandlePoint, 100);
+	pCandle->SetPoints(pCandlePoint, candlecnt);
 	pCandle->SetColor(RGB(0, 255, 0));
 
 	cnt = 0;
