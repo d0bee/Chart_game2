@@ -33,8 +33,9 @@ int cnt;
 // 차트 랜덤 불러오기용 난수
 int candlecnt;
 
-// 주문 주수
-int num;
+// 주문 가격, 주수
+int buycost;
+int buynum;
 
 // 난수값을 얻기 위한 random_device
 std::random_device rd;
@@ -326,24 +327,34 @@ void CostResult()
 
 }
 
-void CChartGameDlg::OnBnClickedBuy()
+void CChartGameDlg::BuyCost(int buy, int num)
 {
-	// 매수가 텍스트 표시
-	CString str;
-	int buy = pCandlePoint[candlecnt - 1 + cnt].Close;
-	str.Format(_T("%d"), buy);
-	m_BuyCost.SetWindowTextW(str);
-
-	// 주문금액에 따른 주수 계산하기
+	// 주문금액에 따른 주수 확인후
 	CString get;
 	GetDlgItemText(IDC_INPUT, get);
-	num = _ttoi(get) / buy * buy;
 
-	str.Format(_T("%d"), num);
-	m_EsCost.SetWindowTextW(str);
+	// 매수가 텍스트 표시
+	CString str;
+	buy = pCandlePoint[candlecnt - 1 + cnt].Close;
 
-	
-	printf(CStringA(str));
+	if (_ttoi(get) < buy) {
+		MessageBox(_T("최소 주문 금액은 현재가보다 높아야 합니다."), _T("Error"));
+	}
+	else {
+		str.Format(_T("%d"), buy);
+		m_BuyCost.SetWindowTextW(str);
+
+		// 실제 평가액 계산
+		num = _ttoi(get) / buy * buy;
+
+		str.Format(_T("%d"), num);
+		m_EsCost.SetWindowTextW(str);
+	}
+}
+
+void CChartGameDlg::OnBnClickedBuy()
+{
+	BuyCost(buycost, buynum);
 }
 
 

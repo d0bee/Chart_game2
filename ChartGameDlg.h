@@ -25,6 +25,10 @@ public:
 
 	// 차트 초기화 작업
 	void ChartReset();
+
+	// 원장 관리 모듈
+	void BuyCost(int buy, int num);
+
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_CHARTGAME_DIALOG };
