@@ -165,6 +165,27 @@ void CChartGameDlg::BtnTrue()
 	pSell->EnableWindow(TRUE);
 }
 
+void CChartGameDlg::ChartReset() 
+{
+	mCount.SetWindowTextW(_T("0/30"));
+
+	m_ChartCtrl.RemoveAllSeries();
+	CChartDateTimeAxis* pBottomAxis = m_ChartCtrl.CreateDateTimeAxis(CChartCtrl::BottomAxis);
+	CChartStandardAxis* pLeftAxis = m_ChartCtrl.CreateStandardAxis(CChartCtrl::LeftAxis);
+	pLeftAxis->SetAutomaticMode(CChartAxis::FullAutomatic);
+	pBottomAxis->SetAutomaticMode(CChartAxis::FullAutomatic);
+	;
+	pCandle = m_ChartCtrl.CreateCandlestickSerie();
+
+	candlecnt = dis(gen);
+	ReadData(pCandlePoint);
+
+	pCandle->SetPoints(pCandlePoint, candlecnt);
+	pCandle->SetColor(RGB(0, 255, 0));
+
+	cnt = 0;
+}
+
 void CChartGameDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
 	if ((nID & 0xFFF0) == IDM_ABOUTBOX)
@@ -293,24 +314,7 @@ void CChartGameDlg::OnBnClickedGo()
 	CString str;
 
 	BtnTrue();
-		
-	mCount.SetWindowTextW(_T("0/30"));
-	
-	m_ChartCtrl.RemoveAllSeries();
-	CChartDateTimeAxis* pBottomAxis = m_ChartCtrl.CreateDateTimeAxis(CChartCtrl::BottomAxis);
-	CChartStandardAxis* pLeftAxis = m_ChartCtrl.CreateStandardAxis(CChartCtrl::LeftAxis);
-	pLeftAxis->SetAutomaticMode(CChartAxis::FullAutomatic);
-	pBottomAxis->SetAutomaticMode(CChartAxis::FullAutomatic);
-;
-	pCandle = m_ChartCtrl.CreateCandlestickSerie();
-	
-	candlecnt = dis(gen);
-	ReadData(pCandlePoint);
-	
-	pCandle->SetPoints(pCandlePoint, candlecnt);
-	pCandle->SetColor(RGB(0, 255, 0));
-
-	cnt = 0;
+	ChartReset();
 
 	str.Format(_T("%.0lf"), pCandlePoint[candlecnt-1].Close);
 	m_CloseCost.SetWindowTextW(str);

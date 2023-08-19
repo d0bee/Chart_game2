@@ -16,11 +16,15 @@ public:
 
 	CChartCandlestickSerie* pCandle;
 
+	// .csv 파일 불러오기
 	void ReadData(SChartCandlestickPoint(pCandlePoint)[480]);
 
+	// Btn 활성화
 	void BtnFalse();
 	void BtnTrue();
 
+	// 차트 초기화 작업
+	void ChartReset();
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_CHARTGAME_DIALOG };
