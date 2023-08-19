@@ -27,7 +27,11 @@ public:
 	void ChartReset();
 
 	// 원장 관리 모듈
+	void Account();
 	void BuyCost();
+	void SellCost(BOOL);
+	BOOL BuyInputErr(int, int);
+	BOOL SellInputErr(int);
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
@@ -65,4 +69,7 @@ public:
 	afx_msg void OnBnClickedSell();
 	CStatic m_BuyCost;
 	CStatic m_EsCost;
+	CStatic m_Profit;
+	CStatic m_Money;
+	CStatic m_Gs;
 };

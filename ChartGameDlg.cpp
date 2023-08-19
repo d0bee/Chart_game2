@@ -28,6 +28,10 @@ int cnt;
 // 차트 랜덤 불러오기용 난수
 int candlecnt;
 
+// 임시 계좌잔액, DB를 연동하는 경우에도 결국 전역변수와 비슷하게 쓰일 것이기 때문에 전역변수로 구현.
+int money;
+int gm;
+int gs;
 
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
 class CAboutDlg : public CDialogEx
@@ -60,11 +64,7 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialogEx)
 END_MESSAGE_MAP()
 
-
 // CChartGameDlg 대화 상자
-
-
-
 CChartGameDlg::CChartGameDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_CHARTGAME_DIALOG, pParent)
 {
@@ -83,6 +83,9 @@ void CChartGameDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_INPUT, m_Input);
 	DDX_Control(pDX, IDC_BUYCOST, m_BuyCost);
 	DDX_Control(pDX, IDC_ESCOST, m_EsCost);
+	DDX_Control(pDX, IDC_Profit, m_Profit);
+	DDX_Control(pDX, IDC_MONEY, m_Money);
+	DDX_Control(pDX, IDC_GS, m_Gs);
 }
 
 BEGIN_MESSAGE_MAP(CChartGameDlg, CDialogEx)
@@ -129,6 +132,8 @@ BOOL CChartGameDlg::OnInitDialog()
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 	BtnFalse();
+	// 원장 초기화, DB와의 연동때 변경되어야 함.
+	Account();
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -283,28 +288,37 @@ HCURSOR CChartGameDlg::OnQueryDragIcon()
 
 void CChartGameDlg::OnBnClickedNext()
 {
-	// 정수 변환용 str
+	// 변환용 str
 	CString str;
 
 	// 최대 cnt
 	int Max_cnt = 30;
 
-	// cost 표시용 str
-	CString cost;
+	// 현재가
+	int now;
 
 	if (cnt < Max_cnt) {
 		str.Format(_T("%d"), ++cnt);
-
 		pCandle->AddPoints(pCandlePoint, candlecnt + (cnt));
 		mCount.SetWindowTextW(str + "/30");
 
-		cost.Format(_T("%.0lf"), pCandlePoint[candlecnt - 1 + cnt].Close);
-		m_CloseCost.SetWindowTextW(cost);
+		now = pCandlePoint[candlecnt - 1 + cnt].Close;
+		str.Format(_T("%d"), now);
+		m_CloseCost.SetWindowTextW(str);
+
+		// 현재가(now)에 따라 평가액(gs*now), 순이익(gs*now - gm) 이 최신화 되어야 함.
+		str.Format(_T("%d"), gs * now);
+		m_EsCost.SetWindowTextW(str);
+
+		str.Format(_T("%d"), gs * now - gm);
+		m_Profit.SetWindowTextW(str);
 	}
 	
 	if (cnt==Max_cnt){
 		mCount.SetWindowTextW(_T("END"));
 		BtnFalse();
+		// if gm이 존재할 경우 자동 SELL이 진행되도록 해야함.
+		SellCost(TRUE);
 	}
 }
 
@@ -321,42 +335,188 @@ void CChartGameDlg::OnBnClickedGo()
 	m_BuyCost.SetWindowTextW(_T("0"));
 }
 
+BOOL CChartGameDlg::BuyInputErr(int input, int now)
+{
+	if (input<1) 
+	{
+		MessageBox(_T("최소 주문 개수는 1개입니다."), _T("Error"));
+		return TRUE;
+	}
+	else {
+		if (money < now) {
+			MessageBox(_T("잔액이 부족합니다."), _T("Error"));
+			return TRUE;
+		}
+		else if (input*now > money) 
+		{
+			MessageBox(_T("잔액이 부족합니다."), _T("Error"));
+			return TRUE;
+		}
+		else {
+			return FALSE;
+		}
+	}
+}
+
 void CChartGameDlg::BuyCost()
 {
-	// 주문 가격, 주수
-	int buy;
-	int num;
-
-	// 주문금액에 따른 주수 확인후
+	// 주문수 가져오기
 	CString get;
 	GetDlgItemText(IDC_INPUT, get);
 
-	// 매수가 텍스트 표시
+	// 매수가 가져오기
 	CString str;
-	buy = pCandlePoint[candlecnt - 1 + cnt].Close;
+	int buy = pCandlePoint[candlecnt - 1 + cnt].Close;
 
-	if (_ttoi(get) < buy) {
-		MessageBox(_T("최소 주문 금액은 현재가보다 높아야 합니다."), _T("Error"));
-	}
-	else {
-		str.Format(_T("%d"), buy);
+	if (BuyInputErr(_ttoi(get),buy)==FALSE)
+	{
+		// 실제 평가액 계산
+		int num = _ttoi(get) * buy;
+
+		// 원장 최신화
+		gm += num;
+		gs += _ttoi(get);
+
+		// 매수가 최신화
+		double buycost = gm / gs;
+		str.Format(_T("%.0lf"), buycost);
 		m_BuyCost.SetWindowTextW(str);
 
-		// 실제 평가액 계산
-		num = _ttoi(get) / buy * buy;
-
-		str.Format(_T("%d"), num);
+		// 평가액 최신화
+		str.Format(_T("%d"), gm);
 		m_EsCost.SetWindowTextW(str);
+
+		// 매수가능액 최신화
+		money -= num;
+		str.Format(_T("%d"), money);
+		m_Money.SetWindowTextW(str);
+
+		// 보유주 최신화
+		str.Format(_T("%d"), gs);
+		m_Gs.SetWindowTextW(str);
+
+		printf("gm : %d gs : %d money : %d buycost : %d input : %d\n", gm, gs, money, buy, _ttoi(get));
 	}
 }
 
 void CChartGameDlg::OnBnClickedBuy()
 {
 	BuyCost();
+	// 원장 최신화, SENTBS()를 통해서 DB업데이트 추가
 }
 
+BOOL CChartGameDlg::SellInputErr(int input)
+{
+	if (input < 1)
+	{
+		MessageBox(_T("최소 주문 개수는 1개입니다."), _T("Error"));
+		return TRUE;
+	}
+	else {
+		if (input > gs) {
+			MessageBox(_T("보유하신 주수가 부족합니다."), _T("Error"));
+			return TRUE;
+		}
+		else {
+			return FALSE;
+		}
+	}
+}
+
+void CChartGameDlg::SellCost(BOOL tf)
+{
+	// 주문수 가져오기
+	CString get;
+	GetDlgItemText(IDC_INPUT, get);
+
+	// 현재가 가져오기
+	CString str;
+	int now = pCandlePoint[candlecnt - 1 + cnt].Close;
+
+	// cnt = max로 끝나는 경우
+	if (tf == TRUE) {
+		money += gs * now;
+		gm = 0;
+		gs = 0;
+
+		m_BuyCost.SetWindowTextW(_T("0"));
+		m_EsCost.SetWindowTextW(_T("0"));
+		m_Profit.SetWindowTextW(_T("0"));
+		m_Gs.SetWindowTextW(_T("0"));
+
+		str.Format(_T("%d"), money);
+		m_Money.SetWindowTextW(str);
+	}
+	else {
+		if (SellInputErr(_ttoi(get)) == FALSE)
+		{
+			// 원장 최신화
+			gs -= _ttoi(get);
+			gm -= _ttoi(get) * now;
+			money += _ttoi(get) * now;
+
+			// 매수가, 평가액, 순이익, 보유수, 매수가능액 최신화
+			if (gs < 1)
+			{
+				// 평단 계산용 변수인 gm이 0으로 초기화 되어야 한다.
+				gm = 0;
+
+				m_BuyCost.SetWindowTextW(_T("0"));
+				m_EsCost.SetWindowTextW(_T("0"));
+				m_Profit.SetWindowTextW(_T("0"));
+				m_Gs.SetWindowTextW(_T("0"));
+
+				str.Format(_T("%d"), money);
+				m_Money.SetWindowTextW(str);
+			}
+			else
+			{
+				// 평가액, 순이익, 보유수, 매수가능액 최신화
+				str.Format(_T("%d"), gm);
+				m_EsCost.SetWindowTextW(str);
+
+				str.Format(_T("%d"), now * gs - gm);
+				m_Profit.SetWindowTextW(str);
+
+				str.Format(_T("%d"), gs);
+				m_Gs.SetWindowTextW(str);
+
+				str.Format(_T("%d"), money);
+				m_Money.SetWindowTextW(str);
+			}
+
+			printf("gm : %d gs : %d money : %d sellcost : %d input : %d\n", gm, gs, money, now, _ttoi(get));
+		}
+	}
+}
 
 void CChartGameDlg::OnBnClickedSell()
 {
-	// pCandle->CreateBalloonLabel(6, _T("candle"));
+	SellCost(FALSE);
+	// 원장 최신화, SENTBS()를 통해서 DB업데이트 추가
 }
+
+
+// 가상의 계좌, 이후 DB와의 연동을 고려해서 변경되어야 함.
+void CChartGameDlg::Account()
+{
+	CString str;
+
+	// DB를 통해서 조회한 금액
+	money = 200000;
+
+	str.Format(_T("%d"), money);
+	m_Money.SetWindowTextW(str);
+
+	// 앞으로 사용될 총 주문액, 개수
+	gm = 0;
+	gs = 0;
+}
+
+// 원장 최신화 메서드, DB 최신화
+void SentBS()
+{
+}
+
+// pCandle->CreateBalloonLabel(6, _T("candle"));
+// 강제로 끝나는 경우 자동 SellCost(TRUE) + SentBS()를 통해 최신화
