@@ -402,6 +402,7 @@ void CChartGameDlg::BuyCost()
 void CChartGameDlg::OnBnClickedBuy()
 {
 	BuyCost();
+	m_Input.SetWindowTextW(_T(""));
 	// 원장 최신화, SENTBS()를 통해서 DB업데이트 추가
 }
 
@@ -432,6 +433,9 @@ void CChartGameDlg::SellCost(BOOL tf)
 	// 현재가 가져오기
 	CString str;
 	int now = pCandlePoint[candlecnt - 1 + cnt].Close;
+
+	// 순이익 계산용
+	CString abc;
 
 	// cnt = max로 끝나는 경우
 	if (tf == TRUE) {
@@ -472,10 +476,11 @@ void CChartGameDlg::SellCost(BOOL tf)
 			else
 			{
 				// 평가액, 순이익, 보유수, 매수가능액 최신화
-				str.Format(_T("%d"), gm);
+				str.Format(_T("%d"), now * gs);
 				m_EsCost.SetWindowTextW(str);
-
-				str.Format(_T("%d"), now * gs - gm);
+				// 23100 * 1 - 20600 , / gs , 23100 * 2 - 43700 (46200 - 43700 = 2600
+				GetDlgItemText(IDC_BUYCOST,abc);
+				str.Format(_T("%d"), (now - _ttoi(abc)) * gs);
 				m_Profit.SetWindowTextW(str);
 
 				str.Format(_T("%d"), gs);
@@ -493,6 +498,7 @@ void CChartGameDlg::SellCost(BOOL tf)
 void CChartGameDlg::OnBnClickedSell()
 {
 	SellCost(FALSE);
+	m_Input.SetWindowTextW(_T(""));
 	// 원장 최신화, SENTBS()를 통해서 DB업데이트 추가
 }
 
