@@ -27,7 +27,7 @@ public:
 	void ChartReset();
 
 	// 원장 관리 모듈
-	void BuyCost(int buy, int num);
+	void BuyCost();
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME

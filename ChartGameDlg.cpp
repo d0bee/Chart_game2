@@ -22,28 +22,14 @@ using namespace std;
 CChartCandlestickSerie* pCandle = nullptr;
 SChartCandlestickPoint pCandlePoint[480];
 
-// 버튼 초기화용
-CButton* pBtn;
-CButton* pBuy;
-CButton* pSell;
-
 // 차트 카운트 계산용 변수
 int cnt;
 
 // 차트 랜덤 불러오기용 난수
 int candlecnt;
 
-// 주문 가격, 주수
-int buycost;
-int buynum;
-
-// 난수값을 얻기 위한 random_device
-std::random_device rd;
-std::mt19937 gen(rd());
-std::uniform_int_distribution<int> dis(1, 450);
 
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
-
 class CAboutDlg : public CDialogEx
 {
 public:
@@ -149,18 +135,21 @@ BOOL CChartGameDlg::OnInitDialog()
 
 void CChartGameDlg::BtnFalse()
 {
-	pBtn = (CButton*)GetDlgItem(IDC_NEXT);
+	CButton* pBtn = (CButton*)GetDlgItem(IDC_NEXT);
+	CButton* pBuy = (CButton*)GetDlgItem(IDC_BUY);
+	CButton* pSell = (CButton*)GetDlgItem(IDC_SELL);
+
 	pBtn->EnableWindow(FALSE);
-
-	pBuy = (CButton*)GetDlgItem(IDC_BUY);
 	pBuy->EnableWindow(FALSE);
-
-	pSell = (CButton*)GetDlgItem(IDC_SELL);
 	pSell->EnableWindow(FALSE);
 }
 
 void CChartGameDlg::BtnTrue()
 {
+	CButton* pBtn = (CButton*)GetDlgItem(IDC_NEXT);
+	CButton* pBuy = (CButton*)GetDlgItem(IDC_BUY);
+	CButton* pSell = (CButton*)GetDlgItem(IDC_SELL);
+
 	pBtn->EnableWindow(TRUE);
 	pBuy->EnableWindow(TRUE);
 	pSell->EnableWindow(TRUE);
@@ -168,6 +157,11 @@ void CChartGameDlg::BtnTrue()
 
 void CChartGameDlg::ChartReset() 
 {
+	// 난수값을 얻기 위한 random_device
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<int> dis(1, 450);
+
 	mCount.SetWindowTextW(_T("0/30"));
 
 	m_ChartCtrl.RemoveAllSeries();
@@ -231,6 +225,11 @@ void CChartGameDlg::OnPaint()
 
 void CChartGameDlg::ReadData(SChartCandlestickPoint(pCandlePoint)[480])
 {
+	// 난수값을 얻기 위한 random_device
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<int> dis(1, 450);
+
 	UpdateData(TRUE);
 
 	//@ 파일에서 데이터 불러오기
@@ -322,13 +321,12 @@ void CChartGameDlg::OnBnClickedGo()
 	m_BuyCost.SetWindowTextW(_T("0"));
 }
 
-void CostResult()
+void CChartGameDlg::BuyCost()
 {
+	// 주문 가격, 주수
+	int buy;
+	int num;
 
-}
-
-void CChartGameDlg::BuyCost(int buy, int num)
-{
 	// 주문금액에 따른 주수 확인후
 	CString get;
 	GetDlgItemText(IDC_INPUT, get);
@@ -354,7 +352,7 @@ void CChartGameDlg::BuyCost(int buy, int num)
 
 void CChartGameDlg::OnBnClickedBuy()
 {
-	BuyCost(buycost, buynum);
+	BuyCost();
 }
 
 
