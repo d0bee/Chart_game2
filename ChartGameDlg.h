@@ -16,7 +16,10 @@ public:
 
 	CChartCandlestickSerie* pCandle;
 
-	void ReadData(SChartCandlestickPoint(pCandlePoint)[600]);
+	void ReadData(SChartCandlestickPoint(pCandlePoint)[480]);
+
+	void BtnFalse();
+	void BtnTrue();
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
@@ -47,4 +50,11 @@ public:
 	afx_msg void OnStnClickedcandcnt();
 //	CStatic candcnt;
 	CStatic m_CloseCost;
+	CButton m_Buy;
+	CButton m_Sell;
+	CEdit m_Input;
+	afx_msg void OnBnClickedBuy();
+	afx_msg void OnBnClickedSell();
+	CStatic m_BuyCost;
+	CStatic m_EsCost;
 };

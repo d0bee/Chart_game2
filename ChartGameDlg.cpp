@@ -21,13 +21,20 @@ using namespace std;
 // 캔들 조작용
 CChartCandlestickSerie* pCandle = nullptr;
 SChartCandlestickPoint pCandlePoint[480];
+
+// 버튼 초기화용
 CButton* pBtn;
+CButton* pBuy;
+CButton* pSell;
 
 // 차트 카운트 계산용 변수
 int cnt;
 
 // 차트 랜덤 불러오기용 난수
 int candlecnt;
+
+// 주문 주수
+int num;
 
 // 난수값을 얻기 위한 random_device
 std::random_device rd;
@@ -87,6 +94,8 @@ void CChartGameDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUY, m_Buy);
 	DDX_Control(pDX, IDC_SELL, m_Sell);
 	DDX_Control(pDX, IDC_INPUT, m_Input);
+	DDX_Control(pDX, IDC_BUYCOST, m_BuyCost);
+	DDX_Control(pDX, IDC_ESCOST, m_EsCost);
 }
 
 BEGIN_MESSAGE_MAP(CChartGameDlg, CDialogEx)
@@ -95,6 +104,8 @@ BEGIN_MESSAGE_MAP(CChartGameDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_NEXT, &CChartGameDlg::OnBnClickedNext)
 	ON_BN_CLICKED(IDC_GO, &CChartGameDlg::OnBnClickedGo)
+	ON_BN_CLICKED(IDC_BUY, &CChartGameDlg::OnBnClickedBuy)
+	ON_BN_CLICKED(IDC_SELL, &CChartGameDlg::OnBnClickedSell)
 END_MESSAGE_MAP()
 
 
@@ -130,9 +141,28 @@ BOOL CChartGameDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
-	/// 초기화
+	BtnFalse();
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
+}
+
+void CChartGameDlg::BtnFalse()
+{
+	pBtn = (CButton*)GetDlgItem(IDC_NEXT);
+	pBtn->EnableWindow(FALSE);
+
+	pBuy = (CButton*)GetDlgItem(IDC_BUY);
+	pBuy->EnableWindow(FALSE);
+
+	pSell = (CButton*)GetDlgItem(IDC_SELL);
+	pSell->EnableWindow(FALSE);
+}
+
+void CChartGameDlg::BtnTrue()
+{
+	pBtn->EnableWindow(TRUE);
+	pBuy->EnableWindow(TRUE);
+	pSell->EnableWindow(TRUE);
 }
 
 void CChartGameDlg::OnSysCommand(UINT nID, LPARAM lParam)
@@ -253,7 +283,7 @@ void CChartGameDlg::OnBnClickedNext()
 	
 	if (cnt==Max_cnt){
 		mCount.SetWindowTextW(_T("END"));
-		pBtn->EnableWindow(FALSE);
+		BtnFalse();
 	}
 }
 
@@ -262,8 +292,8 @@ void CChartGameDlg::OnBnClickedGo()
 	// 정수 변환용 str
 	CString str;
 
-	pBtn = (CButton*)GetDlgItem(IDC_NEXT);
-	pBtn->EnableWindow(TRUE);
+	BtnTrue();
+		
 	mCount.SetWindowTextW(_T("0/30"));
 	
 	m_ChartCtrl.RemoveAllSeries();
@@ -284,6 +314,36 @@ void CChartGameDlg::OnBnClickedGo()
 
 	str.Format(_T("%.0lf"), pCandlePoint[candlecnt-1].Close);
 	m_CloseCost.SetWindowTextW(str);
+	m_BuyCost.SetWindowTextW(_T("0"));
+}
 
-	// pCandle->CreateBalloonLabel(5, _T("This is a candle"));
+void CostResult()
+{
+
+}
+
+void CChartGameDlg::OnBnClickedBuy()
+{
+	// 매수가 텍스트 표시
+	CString str;
+	int buy = pCandlePoint[candlecnt - 1 + cnt].Close;
+	str.Format(_T("%d"), buy);
+	m_BuyCost.SetWindowTextW(str);
+
+	// 주문금액에 따른 주수 계산하기
+	CString get;
+	GetDlgItemText(IDC_INPUT, get);
+	num = _ttoi(get) / buy * buy;
+
+	str.Format(_T("%d"), num);
+	m_EsCost.SetWindowTextW(str);
+
+	
+	printf(CStringA(str));
+}
+
+
+void CChartGameDlg::OnBnClickedSell()
+{
+	// pCandle->CreateBalloonLabel(6, _T("candle"));
 }
