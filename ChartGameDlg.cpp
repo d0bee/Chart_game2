@@ -32,6 +32,7 @@ int candlecnt;
 int money;
 int gm;
 int gs;
+int 평균단가;
 
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
 class CAboutDlg : public CDialogEx
@@ -293,25 +294,15 @@ void CChartGameDlg::OnBnClickedNext()
 
 	// 최대 cnt
 	int Max_cnt = 30;
-
-	// 현재가
-	int now;
-
+	
 	if (cnt < Max_cnt) {
 		str.Format(_T("%d"), ++cnt);
 		pCandle->AddPoints(pCandlePoint, candlecnt + (cnt));
 		mCount.SetWindowTextW(str + "/30");
 
-		now = pCandlePoint[candlecnt - 1 + cnt].Close;
-		str.Format(_T("%d"), now);
-		m_CloseCost.SetWindowTextW(str);
-
-		// 현재가(now)에 따라 평가액(gs*now), 순이익(gs*now - gm) 이 최신화 되어야 함.
-		str.Format(_T("%d"), gs * now);
-		m_EsCost.SetWindowTextW(str);
-
-		str.Format(_T("%d"), gs * now - gm);
-		m_Profit.SetWindowTextW(str);
+		현재가();
+		평가액();
+		순이익();
 	}
 	
 	if (cnt==Max_cnt){
@@ -322,6 +313,7 @@ void CChartGameDlg::OnBnClickedNext()
 	}
 }
 
+// NextCnt ==30 과 같은 강제 종료 추가해야함.
 void CChartGameDlg::OnBnClickedGo()
 {
 	// 정수 변환용 str
@@ -330,9 +322,10 @@ void CChartGameDlg::OnBnClickedGo()
 	BtnTrue();
 	ChartReset();
 
+	SellCost(TRUE);
+
 	str.Format(_T("%.0lf"), pCandlePoint[candlecnt-1].Close);
 	m_CloseCost.SetWindowTextW(str);
-	m_BuyCost.SetWindowTextW(_T("0"));
 }
 
 BOOL CChartGameDlg::BuyInputErr(int input, int now)
@@ -370,32 +363,18 @@ void CChartGameDlg::BuyCost()
 
 	if (BuyInputErr(_ttoi(get),buy)==FALSE)
 	{
-		// 실제 평가액 계산
+		// 실행 주문액
 		int num = _ttoi(get) * buy;
 
 		// 원장 최신화
-		gm += num;
+		평균단가 = ((평균단가 * gs) + num) / (_ttoi(get) + gs);
 		gs += _ttoi(get);
-
-		// 매수가 최신화
-		double buycost = gm / gs;
-		str.Format(_T("%.0lf"), buycost);
-		m_BuyCost.SetWindowTextW(str);
-
-		// 평가액 최신화
-		str.Format(_T("%d"), gm);
-		m_EsCost.SetWindowTextW(str);
-
-		// 매수가능액 최신화
 		money -= num;
-		str.Format(_T("%d"), money);
-		m_Money.SetWindowTextW(str);
-
-		// 보유주 최신화
-		str.Format(_T("%d"), gs);
-		m_Gs.SetWindowTextW(str);
-
-		printf("gm : %d gs : %d money : %d buycost : %d input : %d\n", gm, gs, money, buy, _ttoi(get));
+		
+		매수가();
+		평가액();
+		매수가능액();
+		보유수();
 	}
 }
 
@@ -434,13 +413,9 @@ void CChartGameDlg::SellCost(BOOL tf)
 	CString str;
 	int now = pCandlePoint[candlecnt - 1 + cnt].Close;
 
-	// 순이익 계산용
-	CString abc;
-
 	// cnt = max로 끝나는 경우
 	if (tf == TRUE) {
 		money += gs * now;
-		gm = 0;
 		gs = 0;
 
 		m_BuyCost.SetWindowTextW(_T("0"));
@@ -456,15 +431,11 @@ void CChartGameDlg::SellCost(BOOL tf)
 		{
 			// 원장 최신화
 			gs -= _ttoi(get);
-			gm -= _ttoi(get) * now;
 			money += _ttoi(get) * now;
 
 			// 매수가, 평가액, 순이익, 보유수, 매수가능액 최신화
 			if (gs < 1)
 			{
-				// 평단 계산용 변수인 gm이 0으로 초기화 되어야 한다.
-				gm = 0;
-
 				m_BuyCost.SetWindowTextW(_T("0"));
 				m_EsCost.SetWindowTextW(_T("0"));
 				m_Profit.SetWindowTextW(_T("0"));
@@ -475,22 +446,11 @@ void CChartGameDlg::SellCost(BOOL tf)
 			}
 			else
 			{
-				// 평가액, 순이익, 보유수, 매수가능액 최신화
-				str.Format(_T("%d"), now * gs);
-				m_EsCost.SetWindowTextW(str);
-				// 23100 * 1 - 20600 , / gs , 23100 * 2 - 43700 (46200 - 43700 = 2600
-				GetDlgItemText(IDC_BUYCOST,abc);
-				str.Format(_T("%d"), (now - _ttoi(abc)) * gs);
-				m_Profit.SetWindowTextW(str);
-
-				str.Format(_T("%d"), gs);
-				m_Gs.SetWindowTextW(str);
-
-				str.Format(_T("%d"), money);
-				m_Money.SetWindowTextW(str);
+				평가액();
+				순이익();
+				보유수();
+				매수가능액();
 			}
-
-			printf("gm : %d gs : %d money : %d sellcost : %d input : %d\n", gm, gs, money, now, _ttoi(get));
 		}
 	}
 }
@@ -515,8 +475,66 @@ void CChartGameDlg::Account()
 	m_Money.SetWindowTextW(str);
 
 	// 앞으로 사용될 총 주문액, 개수
-	gm = 0;
 	gs = 0;
+	평균단가 = 0;
+}
+
+void CChartGameDlg::현재가()
+{
+	int now = pCandlePoint[candlecnt - 1 + cnt].Close;
+	CString str;
+	str.Format(_T("%d"), now);
+
+	m_CloseCost.SetWindowTextW(str);
+}
+
+void CChartGameDlg::매수가()
+{
+	CString str;
+	str.Format(_T("%d"), 평균단가);
+
+	m_BuyCost.SetWindowTextW(str);
+}
+
+void CChartGameDlg::평가액()
+{
+	CString now;
+	GetDlgItemText(IDC_CLOSECOST, now);
+
+	int cost = _ttoi(now) * gs;
+	CString str;
+	str.Format(_T("%d"), cost);
+
+	m_EsCost.SetWindowTextW(str);
+}
+
+void CChartGameDlg::순이익()
+{
+	CString now;
+	GetDlgItemText(IDC_CLOSECOST, now);
+	int cost;
+
+	cost = (_ttoi(now) - 평균단가) * gs;
+
+	CString str;
+	str.Format(_T("%d"), cost);
+	m_Profit.SetWindowTextW(str);
+}
+
+void CChartGameDlg::매수가능액()
+{
+	CString str;
+	str.Format(_T("%d"), money);
+
+	m_Money.SetWindowTextW(str);
+}
+
+void CChartGameDlg::보유수()
+{
+	CString str;
+	str.Format(_T("%d"), gs);
+
+	m_Gs.SetWindowTextW(str);
 }
 
 // 원장 최신화 메서드, DB 최신화

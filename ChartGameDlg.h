@@ -33,6 +33,14 @@ public:
 	BOOL BuyInputErr(int, int);
 	BOOL SellInputErr(int);
 
+	// UI 업데이트 모듈
+	void 현재가();
+	void 매수가();
+	void 평가액();
+	void 순이익();
+	void 매수가능액();
+	void 보유수();
+
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_CHARTGAME_DIALOG };
