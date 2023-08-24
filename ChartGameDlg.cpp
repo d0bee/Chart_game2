@@ -9,12 +9,15 @@
 #include "afxdialogex.h"
 #include <random>
 
+// dlg bind
+#include "ChartGameChild.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 // 콘솔 디버깅용
-#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
+// #pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 
 using namespace std;
 
@@ -135,6 +138,11 @@ BOOL CChartGameDlg::OnInitDialog()
 	BtnFalse();
 	// 원장 초기화, DB와의 연동때 변경되어야 함.
 	Account();
+	// 로그인 Child
+	ChartGameChild* pDlg = new ChartGameChild;
+	pDlg->Create(IDD_CHARTGAME_CHILD, this);
+	pDlg->CenterWindow();
+	pDlg->ShowWindow(SW_SHOW);
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
