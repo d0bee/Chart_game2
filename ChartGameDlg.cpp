@@ -139,10 +139,10 @@ BOOL CChartGameDlg::OnInitDialog()
 	// 원장 초기화, DB와의 연동때 변경되어야 함.
 	Account();
 	// 로그인 Child
-	ChartGameChild* pDlg = new ChartGameChild;
-	pDlg->Create(IDD_CHARTGAME_CHILD, this);
-	pDlg->CenterWindow();
-	pDlg->ShowWindow(SW_SHOW);
+	// ChartGameChild* pDlg = new ChartGameChild;
+	// pDlg->Create(IDD_CHARTGAME_CHILD, this);
+	// pDlg->CenterWindow();
+	// pDlg->ShowWindow(SW_SHOW);
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -552,3 +552,9 @@ void SentBS()
 
 // pCandle->CreateBalloonLabel(6, _T("candle"));
 // 강제로 끝나는 경우 자동 SellCost(TRUE) + SentBS()를 통해 최신화
+
+
+void CChartGameDlg::OnBnClickedIndicator()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
