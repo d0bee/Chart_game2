@@ -12,12 +12,15 @@
 // dlg bind
 #include "ChartGameChild.h"
 
+// indicator bind
+#include "Indicator.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
 // 콘솔 디버깅용
-// #pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
+#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 
 using namespace std;
 
@@ -143,6 +146,13 @@ BOOL CChartGameDlg::OnInitDialog()
 	// pDlg->Create(IDD_CHARTGAME_CHILD, this);
 	// pDlg->CenterWindow();
 	// pDlg->ShowWindow(SW_SHOW);
+	Indicator* pInd = new Indicator;
+	pInd->Create(IDD_CHARTGAME_INDICATOR, this);
+	pInd->CenterWindow();
+	pInd->ShowWindow(SW_SHOW);
+
+	// indicator child
+	
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -321,9 +331,9 @@ void CChartGameDlg::OnBnClickedNext()
 	}
 }
 
-// NextCnt ==30 과 같은 강제 종료 추가해야함.
 void CChartGameDlg::OnBnClickedGo()
 {
+	printf("go");
 	// 정수 변환용 str
 	CString str;
 
@@ -553,8 +563,3 @@ void SentBS()
 // pCandle->CreateBalloonLabel(6, _T("candle"));
 // 강제로 끝나는 경우 자동 SellCost(TRUE) + SentBS()를 통해 최신화
 
-
-void CChartGameDlg::OnBnClickedIndicator()
-{
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-}
