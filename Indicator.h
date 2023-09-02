@@ -11,6 +11,8 @@ class Indicator : public CDialogEx
 public:
 	Indicator(CWnd* pParent = nullptr);   // 표준 생성자입니다.
 	virtual ~Indicator();
+	void AddIND();
+	CString GetComboT();
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
@@ -22,4 +24,8 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
+	CComboBox CtrlCBox;
+	afx_msg void OnCbnSelchangeIndcombo();
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	virtual BOOL OnInitDialog();
 };
