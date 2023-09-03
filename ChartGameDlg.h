@@ -6,6 +6,7 @@
 #include "ChartCtrl.h"
 #include "ChartLineSerie.h"
 #include "ChartCandlestickSerie.h"
+#include "UIupdate.h"
 
 // CChartGameDlg 대화 상자
 class CChartGameDlg : public CDialogEx
@@ -32,7 +33,7 @@ public:
 	BOOL SellInputErr(int);
 
 	// UI 업데이트 모듈
-	void 현재가();
+	void 현재가(SChartCandlestickPoint pCandlePoint[480], int candlecnt, int cnt);
 	void 매수가();
 	void 평가액();
 	void 순이익();
@@ -78,4 +79,10 @@ public:
 	CStatic m_Profit;
 	CStatic m_Money;
 	CStatic m_Gs;
+
+	// 임시 계좌잔액, DB를 연동하는 경우에도 결국 전역변수와 비슷하게 쓰일 것이기 때문에 전역변수로 구현.
+	int money;
+	int gm;
+	int gs;
+	int 평균단가;
 };

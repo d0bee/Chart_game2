@@ -9,7 +9,7 @@
 #include "afxdialogex.h"
 #include <random>
 
-// dlg bind
+// child bind
 // #include "ChartGameChild.h"
 
 // indicator bind
@@ -39,12 +39,6 @@ int cnt;
 
 // 차트 랜덤 불러오기용 난수
 int candlecnt;
-
-// 임시 계좌잔액, DB를 연동하는 경우에도 결국 전역변수와 비슷하게 쓰일 것이기 때문에 전역변수로 구현.
-int money;
-int gm;
-int gs;
-int 평균단가;
 
 // Indicator 조작용 변수
 Indicator* pInd;
@@ -351,7 +345,7 @@ void CChartGameDlg::OnBnClickedNext()
 		pSeries->AddPoint(XVal[candlecnt+ cnt - 1], close[candlecnt + cnt - 1]);
 		mCount.SetWindowTextW(str + "/30");
 
-		현재가();
+		현재가(pCandlePoint, candlecnt, cnt);
 		평가액();
 		순이익();
 	}
@@ -512,7 +506,6 @@ void CChartGameDlg::OnBnClickedSell()
 	// 원장 최신화, SENTBS()를 통해서 DB업데이트 추가
 }
 
-
 // 가상의 계좌, 이후 DB와의 연동을 고려해서 변경되어야 함.
 void CChartGameDlg::Account()
 {
@@ -527,64 +520,6 @@ void CChartGameDlg::Account()
 	// 앞으로 사용될 총 주문액, 개수
 	gs = 0;
 	평균단가 = 0;
-}
-
-void CChartGameDlg::현재가()
-{
-	int now = pCandlePoint[candlecnt - 1 + cnt].Close;
-	CString str;
-	str.Format(_T("%d"), now);
-
-	m_CloseCost.SetWindowTextW(str);
-}
-
-void CChartGameDlg::매수가()
-{
-	CString str;
-	str.Format(_T("%d"), 평균단가);
-
-	m_BuyCost.SetWindowTextW(str);
-}
-
-void CChartGameDlg::평가액()
-{
-	CString now;
-	GetDlgItemText(IDC_CLOSECOST, now);
-
-	int cost = _ttoi(now) * gs;
-	CString str;
-	str.Format(_T("%d"), cost);
-
-	m_EsCost.SetWindowTextW(str);
-}
-
-void CChartGameDlg::순이익()
-{
-	CString now;
-	GetDlgItemText(IDC_CLOSECOST, now);
-	int cost;
-
-	cost = (_ttoi(now) - 평균단가) * gs;
-
-	CString str;
-	str.Format(_T("%d"), cost);
-	m_Profit.SetWindowTextW(str);
-}
-
-void CChartGameDlg::매수가능액()
-{
-	CString str;
-	str.Format(_T("%d"), money);
-
-	m_Money.SetWindowTextW(str);
-}
-
-void CChartGameDlg::보유수()
-{
-	CString str;
-	str.Format(_T("%d"), gs);
-
-	m_Gs.SetWindowTextW(str);
 }
 
 // 원장 최신화 메서드, DB 최신화
