@@ -360,6 +360,10 @@ void CChartGameDlg::OnBnClickedNext()
 
 void CChartGameDlg::OnBnClickedGo()
 {
+	// if 게임 진행 도중 START 재작동시
+	SellCost(TRUE, pCandlePoint, candlecnt, cnt);
+	m_Input.SetWindowTextW(_T(""));
+
 	// 정수 변환용 str
 	CString str;
 
