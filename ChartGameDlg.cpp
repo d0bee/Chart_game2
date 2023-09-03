@@ -1,4 +1,4 @@
-﻿
+﻿﻿
 // ChartGameDlg.cpp: 구현 파일
 //
 
@@ -31,6 +31,9 @@ CChartXYSerie* pSeries = nullptr;
 CChartCandlestickSerie* pCandle = nullptr;
 SChartCandlestickPoint pCandlePoint[480];
 
+// 날짜 / 종가 변수
+double XVal[480], close[480];
+
 // 차트 카운트 계산용 변수
 int cnt;
 
@@ -53,21 +56,21 @@ class CAboutDlg : public CDialogEx
 public:
 	CAboutDlg();
 
-// 대화 상자 데이터입니다.
+	// 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_ABOUTBOX };
 #endif
 
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV 지원입니다.
 
-// 구현입니다.
+	// 구현입니다.
 protected:
 	DECLARE_MESSAGE_MAP()
 public:
-//	virtual BOOL OnInitDialog();
-//	CButton m_send;
-//	CButton m_send;
+	//	virtual BOOL OnInitDialog();
+	//	CButton m_send;
+	//	CButton m_send;
 };
 
 CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
@@ -157,13 +160,13 @@ BOOL CChartGameDlg::OnInitDialog()
 	// pDlg->Create(IDD_CHARTGAME_CHILD, this);
 	// pDlg->CenterWindow();
 	// pDlg->ShowWindow(SW_SHOW);
-	
+
 	// indicator child
 	pInd = new Indicator;
 	pInd->Create(IDD_CHARTGAME_INDICATOR, this);
 	pInd->CenterWindow();
 	pInd->ShowWindow(SW_SHOW);
-	
+
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -190,7 +193,7 @@ void CChartGameDlg::BtnTrue()
 	pSell->EnableWindow(TRUE);
 }
 
-void CChartGameDlg::ChartReset() 
+void CChartGameDlg::ChartReset()
 {
 	// 난수값을 얻기 위한 random_device
 	std::random_device rd;
@@ -207,16 +210,14 @@ void CChartGameDlg::ChartReset()
 	pBottomAxis->SetAutomaticMode(CChartAxis::FullAutomatic);
 	pBottomAxis->SetVisible(FALSE);
 
-	
 	// 라인차트
-
-
+	pSeries = m_ChartCtrl.CreateLineSerie();
 
 	// 봉차트
 	pCandle = m_ChartCtrl.CreateCandlestickSerie();
 
 	candlecnt = dis(gen);
-	ReadData(pCandlePoint);
+	ReadData(pCandlePoint, pSeries, candlecnt);
 
 	pCandle->SetPoints(pCandlePoint, candlecnt);
 	pCandle->SetColor(RGB(0, 255, 0));
@@ -266,7 +267,7 @@ void CChartGameDlg::OnPaint()
 	}
 }
 
-void CChartGameDlg::ReadData(SChartCandlestickPoint(pCandlePoint)[480])
+void CChartGameDlg::ReadData(SChartCandlestickPoint(pCandlePoint)[480], CChartXYSerie* pSeries, int cnt_max)
 {
 	// 난수값을 얻기 위한 random_device
 	std::random_device rd;
@@ -277,12 +278,12 @@ void CChartGameDlg::ReadData(SChartCandlestickPoint(pCandlePoint)[480])
 
 	//@ 파일에서 데이터 불러오기
 	// 파일열기
-	 
+
 	// 랜덤용 변수
 	CString str;
 	int random = dis(gen) % 5 + 1;
 	str.Format(_T("%d"), random);
-	
+
 	// 파일명 초기화 작업
 	CStringA strCSVfileName = "";
 	strCSVfileName = (CStringA)theApp.m_sAppPath + L"\\data\\testdata" + (CStringA)str + ".csv";
@@ -300,19 +301,31 @@ void CChartGameDlg::ReadData(SChartCandlestickPoint(pCandlePoint)[480])
 	double temp;
 	int year, month, day;
 
+	double open, high, low;
+
 	for (int i = 0; i < 480; i++)
 	{
 		fscanf_s(f, "%4d%2d%2d,%lf,%lf,%lf,%lf,%lf\n",	//  날짜, 시가, 종가, 고가, 저가, 거래량
 			&year, &month, &day,
-			&pCandlePoint[i].Open,
-			&pCandlePoint[i].Close,
-			&pCandlePoint[i].High,
-			&pCandlePoint[i].Low,
+			&open,
+			&close[i],
+			&high,
+			&low,
 			&temp);
 
 		COleDateTime date(year, month, day, 0, 0, 0);
-		pCandlePoint[i].XVal = CChartCtrl::DateToValue(date);
+		XVal[i] = CChartCtrl::DateToValue(date);
+
+		// 봉차트
+		pCandlePoint[i].Open = open;
+		pCandlePoint[i].Close = close[i];
+		pCandlePoint[i].High = high;
+		pCandlePoint[i].Low = low;
+
+		pCandlePoint[i].XVal = XVal[i];
 	}
+	// 라인차트
+	pSeries->SetPoints(XVal, close, cnt_max);
 
 	fclose(f);				//파일 닫기
 }
@@ -331,18 +344,19 @@ void CChartGameDlg::OnBnClickedNext()
 
 	// 최대 cnt
 	int Max_cnt = 30;
-	
+
 	if (cnt < Max_cnt) {
 		str.Format(_T("%d"), ++cnt);
 		pCandle->AddPoints(pCandlePoint, candlecnt + (cnt));
+		pSeries->AddPoint(XVal[candlecnt+ cnt - 1], close[candlecnt + cnt - 1]);
 		mCount.SetWindowTextW(str + "/30");
 
 		현재가();
 		평가액();
 		순이익();
 	}
-	
-	if (cnt==Max_cnt){
+
+	if (cnt == Max_cnt) {
 		mCount.SetWindowTextW(_T("END"));
 		BtnFalse();
 		// if gm이 존재할 경우 자동 SELL이 진행되도록 해야함.
@@ -360,13 +374,13 @@ void CChartGameDlg::OnBnClickedGo()
 
 	SellCost(TRUE);
 
-	str.Format(_T("%.0lf"), pCandlePoint[candlecnt-1].Close);
+	str.Format(_T("%.0lf"), pCandlePoint[candlecnt - 1].Close);
 	m_CloseCost.SetWindowTextW(str);
 }
 
 BOOL CChartGameDlg::BuyInputErr(int input, int now)
 {
-	if (input<1) 
+	if (input < 1)
 	{
 		MessageBox(_T("최소 주문 개수는 1개입니다."), _T("Error"));
 		return TRUE;
@@ -376,7 +390,7 @@ BOOL CChartGameDlg::BuyInputErr(int input, int now)
 			MessageBox(_T("잔액이 부족합니다."), _T("Error"));
 			return TRUE;
 		}
-		else if (input*now > money) 
+		else if (input * now > money)
 		{
 			MessageBox(_T("잔액이 부족합니다."), _T("Error"));
 			return TRUE;
@@ -397,7 +411,7 @@ void CChartGameDlg::BuyCost()
 	CString str;
 	int buy = pCandlePoint[candlecnt - 1 + cnt].Close;
 
-	if (BuyInputErr(_ttoi(get),buy)==FALSE)
+	if (BuyInputErr(_ttoi(get), buy) == FALSE)
 	{
 		// 실행 주문액
 		int num = _ttoi(get) * buy;
@@ -406,7 +420,7 @@ void CChartGameDlg::BuyCost()
 		평균단가 = ((평균단가 * gs) + num) / (_ttoi(get) + gs);
 		gs += _ttoi(get);
 		money -= num;
-		
+
 		매수가();
 		평가액();
 		매수가능액();

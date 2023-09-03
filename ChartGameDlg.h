@@ -14,10 +14,8 @@ class CChartGameDlg : public CDialogEx
 public:
 	CChartGameDlg(CWnd* pParent = nullptr);	// 표준 생성자입니다.
 
-	CChartCandlestickSerie* pCandle;
-
 	// .csv 파일 불러오기
-	void ReadData(SChartCandlestickPoint(pCandlePoint)[480]);
+	void ReadData(SChartCandlestickPoint*, CChartXYSerie*, int);
 
 	// Btn 활성화
 	void BtnFalse();
@@ -68,7 +66,7 @@ public:
 	afx_msg void OnBnClickedGo();
 	CStatic mCount;
 	afx_msg void OnStnClickedcandcnt();
-//	CStatic candcnt;
+
 	CStatic m_CloseCost;
 	CButton m_Buy;
 	CButton m_Sell;
