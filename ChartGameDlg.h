@@ -3,10 +3,16 @@
 //
 
 #pragma once
+// 차트 컨트롤
 #include "ChartCtrl.h"
 #include "ChartLineSerie.h"
 #include "ChartCandlestickSerie.h"
+
+// UI
 #include "UIupdate.h"
+
+// 원장
+#include "Account.h"
 
 // CChartGameDlg 대화 상자
 class CChartGameDlg : public CDialogEx
@@ -27,13 +33,13 @@ public:
 
 	// 원장 관리 모듈
 	void Account();
-	void BuyCost();
-	void SellCost(BOOL);
+	void BuyCost(SChartCandlestickPoint*, int, int);
+	void SellCost(BOOL, SChartCandlestickPoint*, int, int);
 	BOOL BuyInputErr(int, int);
 	BOOL SellInputErr(int);
 
 	// UI 업데이트 모듈
-	void 현재가(SChartCandlestickPoint pCandlePoint[480], int candlecnt, int cnt);
+	void 현재가(SChartCandlestickPoint *, int, int);
 	void 매수가();
 	void 평가액();
 	void 순이익();
