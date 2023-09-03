@@ -64,13 +64,21 @@ CString Indicator::GetComboT()
 
 void Indicator::OnCbnSelchangeIndcombo()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	CString str = GetComboT();
+	CString str;
+	m_Parents->mCount.GetWindowTextW(str);
 
-	Ind_set* pInd_set = new Ind_set;
-	pInd_set->Create(IDD_CHARTGAME_INDSET, this);
-	pInd_set->CenterWindow();
-	pInd_set->ShowWindow(SW_SHOW);
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	// 차트가 생성되기 전에 indicator를 추가하지 못하게 하기 위해 추가한 If문
+	if (str != "")
+	{
+		// GetComboT() 내용을 자식에게 전해주고 자식은 부모의 부모의 차트를 참조하여 내용 변경을 해야한다.
+		// str = GetComboT();
+
+		Ind_set* pInd_set = new Ind_set;
+		pInd_set->Create(IDD_CHARTGAME_INDSET, this);
+		pInd_set->CenterWindow();
+		pInd_set->ShowWindow(SW_SHOW);
+	}
 }
 
 

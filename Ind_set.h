@@ -11,8 +11,6 @@ class Ind_set : public CDialogEx
 public:
 	Ind_set(CWnd* pParent = nullptr);   // 표준 생성자입니다.
 	virtual ~Ind_set();
-	void send();
-	void reset();
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
@@ -25,4 +23,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	CButton m_send;
+	afx_msg void OnBnClickedOk();
+	virtual BOOL OnInitDialog();
+	void ChartIndSet(CString);
 };
