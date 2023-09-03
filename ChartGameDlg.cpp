@@ -10,7 +10,7 @@
 #include <random>
 
 // dlg bind
-#include "ChartGameChild.h"
+// #include "ChartGameChild.h"
 
 // indicator bind
 #include "Indicator.h"
@@ -23,6 +23,9 @@
 #pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 
 using namespace std;
+
+// 라인 조작용
+CChartXYSerie* pSeries = nullptr;
 
 // 캔들 조작용
 CChartCandlestickSerie* pCandle = nullptr;
@@ -39,6 +42,10 @@ int money;
 int gm;
 int gs;
 int 평균단가;
+
+// Indicator 조작용 변수
+Indicator* pInd;
+int test;
 
 // 응용 프로그램 정보에 사용되는 CAboutDlg 대화 상자입니다.
 class CAboutDlg : public CDialogEx
@@ -57,6 +64,10 @@ public:
 // 구현입니다.
 protected:
 	DECLARE_MESSAGE_MAP()
+public:
+//	virtual BOOL OnInitDialog();
+//	CButton m_send;
+//	CButton m_send;
 };
 
 CAboutDlg::CAboutDlg() : CDialogEx(IDD_ABOUTBOX)
@@ -146,12 +157,12 @@ BOOL CChartGameDlg::OnInitDialog()
 	// pDlg->Create(IDD_CHARTGAME_CHILD, this);
 	// pDlg->CenterWindow();
 	// pDlg->ShowWindow(SW_SHOW);
-	Indicator* pInd = new Indicator;
+	
+	// indicator child
+	pInd = new Indicator;
 	pInd->Create(IDD_CHARTGAME_INDICATOR, this);
 	pInd->CenterWindow();
 	pInd->ShowWindow(SW_SHOW);
-
-	// indicator child
 	
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
@@ -188,12 +199,20 @@ void CChartGameDlg::ChartReset()
 
 	mCount.SetWindowTextW(_T("0/30"));
 
+	// 화면 초기화
 	m_ChartCtrl.RemoveAllSeries();
 	CChartDateTimeAxis* pBottomAxis = m_ChartCtrl.CreateDateTimeAxis(CChartCtrl::BottomAxis);
 	CChartStandardAxis* pLeftAxis = m_ChartCtrl.CreateStandardAxis(CChartCtrl::LeftAxis);
 	pLeftAxis->SetAutomaticMode(CChartAxis::FullAutomatic);
 	pBottomAxis->SetAutomaticMode(CChartAxis::FullAutomatic);
-	;
+	pBottomAxis->SetVisible(FALSE);
+
+	
+	// 라인차트
+
+
+
+	// 봉차트
 	pCandle = m_ChartCtrl.CreateCandlestickSerie();
 
 	candlecnt = dis(gen);
@@ -333,7 +352,6 @@ void CChartGameDlg::OnBnClickedNext()
 
 void CChartGameDlg::OnBnClickedGo()
 {
-	printf("go");
 	// 정수 변환용 str
 	CString str;
 
@@ -562,4 +580,3 @@ void SentBS()
 
 // pCandle->CreateBalloonLabel(6, _T("candle"));
 // 강제로 끝나는 경우 자동 SellCost(TRUE) + SentBS()를 통해 최신화
-
