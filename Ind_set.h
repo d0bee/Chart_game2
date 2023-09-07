@@ -1,6 +1,11 @@
 ﻿#pragma once
 #include "afxdialogex.h"
 
+// 부모의 부모
+#include "ChartGameDlg.h"
+
+// 부모
+#include "Indicator.h"
 
 // Ind_set 대화 상자
 
@@ -26,4 +31,10 @@ public:
 	afx_msg void OnBnClickedOk();
 	virtual BOOL OnInitDialog();
 	void ChartIndSet(CString);
+	void mov_avg();
+	CEdit m_V1;
+	CEdit m_V2;
+	CEdit m_V3;
+	CEdit m_V4;
+	CEdit m_V5;
 };
