@@ -136,3 +136,4 @@ BOOL CChartGameDlg::SellInputErr(int input)
 		}
 	}
 }
+
