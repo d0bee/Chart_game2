@@ -367,6 +367,11 @@ void CChartGameDlg::OnBnClickedGo()
 	// 정수 변환용 str
 	CString str;
 
+	// 매수가능액 설정
+	str.Format(_T("%d"), money);
+	m_Money.SetWindowTextW(str);
+
+
 	BtnTrue();
 	ChartReset();
 
