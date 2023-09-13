@@ -35,6 +35,13 @@ void Ind_set::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_mValue3, m_V3);
 	DDX_Control(pDX, IDC_mValue4, m_V4);
 	DDX_Control(pDX, IDC_mValue5, m_V5);
+	DDX_Control(pDX, IDC_LABEL1, m_L1);
+	DDX_Control(pDX, IDC_LABEL2, m_L2);
+	DDX_Control(pDX, IDC_LABEL3, m_L3);
+	DDX_Control(pDX, IDC_LABEL4, m_L4);
+	DDX_Control(pDX, IDC_LABEL5, m_L5);
+	DDX_Control(pDX, IDC_LABEL6, m_L6);
+	DDX_Control(pDX, IDC_mValue6, m_V6);
 }
 
 
@@ -56,7 +63,7 @@ void Ind_set::OnBnClickedOk()
 	// str에 따라서 m_Parents_Parents의 라인 차트를 조정해야함.
 	if (str == "이동평균선")
 	{
-		
+		mov_avg();
 	}
 
 	CDialogEx::OnOK();
@@ -64,8 +71,6 @@ void Ind_set::OnBnClickedOk()
 
 void Ind_set::ChartIndSet(CString str)
 {
-	// 1. 이동평균선이면 화면에 변수 1을 기간 1, 변수 2를 기간 2... 으로 변경시켜야 함.
-	// 만약 볼린저밴드라면 좌측은 기간, 중간은 편차 등으로 상황에 맞게 TextW 변경
 	// 2. ChartIndSet 분류를 통해 m_Parents_Parents의 pSeries의 형태를 변형, 추가시켜야 함.
 	// m_Parents_Parents->XVal, close 등의 변수를 이용
 	// 이동평균선 기간이 10이라면 최우선 생성되는 9일은 이동평균선이 없어야 함.
@@ -74,7 +79,14 @@ void Ind_set::ChartIndSet(CString str)
 
 	if (str == "이동평균선")
 	{
-		
+		m_L1.SetWindowTextW(_T("기간1"));
+		m_L2.SetWindowTextW(_T("기간2"));
+		m_L3.SetWindowTextW(_T("기간3"));
+		m_L4.SetWindowTextW(_T("기간4"));
+		m_L5.SetWindowTextW(_T("기간5"));
+		m_L6.SetWindowTextW(_T("기간6"));
+
+		mov_avg();
 	}
 }
 
@@ -82,7 +94,7 @@ void Ind_set::ChartIndSet(CString str)
 void Ind_set::mov_avg()
 {
 	CString str;
-	int arr[5] = { 0 };
+	int arr[6] = { 0 };
 
 	m_V1.GetWindowTextW(str);
 	arr[0] = _ttoi(str);
@@ -99,6 +111,9 @@ void Ind_set::mov_avg()
 	m_V5.GetWindowTextW(str);
 	arr[4] = _ttoi(str);
 
+	m_V6.GetWindowTextW(str);
+	arr[5] = _ttoi(str);
+
 	m_Parents_Parents->pSeries;
 }
 
@@ -112,6 +127,10 @@ BOOL Ind_set::OnInitDialog()
 
 	// 부모
 	m_Parents = (Indicator*)GetParent();
+
+	CString str;
+	m_Parents->CtrlCBox.GetWindowTextW(str);
+	ChartIndSet(str);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.

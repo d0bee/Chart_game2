@@ -37,4 +37,11 @@ public:
 	CEdit m_V3;
 	CEdit m_V4;
 	CEdit m_V5;
+	CStatic m_L1;
+	CStatic m_L2;
+	CStatic m_L3;
+	CStatic m_L4;
+	CStatic m_L5;
+	CStatic m_L6;
+	CEdit m_V6;
 };
