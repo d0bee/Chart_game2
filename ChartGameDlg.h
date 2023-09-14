@@ -31,20 +31,23 @@ public:
 	// 차트 초기화 작업
 	void ChartReset();
 
-	// 원장 관리 모듈
+	// 원장 관리 모듈 -> Account.cpp
 	void Account();
 	void BuyCost(SChartCandlestickPoint*, int, int);
 	void SellCost(BOOL, SChartCandlestickPoint*, int, int);
 	BOOL BuyInputErr(int, int);
 	BOOL SellInputErr(int);
 
-	// UI 업데이트 모듈
+	// UI 업데이트 모듈 -> UIupdate.cpp
 	void 현재가(SChartCandlestickPoint *, int, int);
 	void 매수가();
 	void 평가액();
 	void 순이익();
 	void 매수가능액();
 	void 보유수();
+
+	// return value
+	void return_pSeries_Value();
 
 // 대화 상자 데이터입니다.
 #ifdef AFX_DESIGN_TIME
@@ -91,4 +94,7 @@ public:
 	int gm;
 	int gs;
 	int 평균단가;
+
+	// 라인차트
+	CChartXYSerie* pSeries;
 };

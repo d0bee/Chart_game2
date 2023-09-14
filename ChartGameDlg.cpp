@@ -320,6 +320,7 @@ void CChartGameDlg::ReadData(SChartCandlestickPoint(pCandlePoint)[480], CChartXY
 	}
 	// 라인차트
 	pSeries->SetPoints(XVal, close, cnt_max);
+	printf("%lf", XVal[5]);
 
 	fclose(f);				//파일 닫기
 }
@@ -356,6 +357,7 @@ void CChartGameDlg::OnBnClickedNext()
 		// if gm이 존재할 경우 자동 SELL이 진행되도록 해야함.
 		SellCost(TRUE, pCandlePoint, candlecnt, cnt);
 	}
+
 }
 
 void CChartGameDlg::OnBnClickedGo()
@@ -379,6 +381,8 @@ void CChartGameDlg::OnBnClickedGo()
 
 	str.Format(_T("%.0lf"), pCandlePoint[candlecnt - 1].Close);
 	m_CloseCost.SetWindowTextW(str);
+
+	return_pSeries_Value();
 }
 
 void CChartGameDlg::OnBnClickedBuy()
@@ -398,6 +402,13 @@ void CChartGameDlg::OnBnClickedSell()
 // 원장 최신화 메서드, DB 최신화
 void SentBS()
 {
+}
+
+void CChartGameDlg::return_pSeries_Value()
+{
+	double *Val = XVal;
+
+	printf("%lf",Val[5]);
 }
 
 // pCandle->CreateBalloonLabel(6, _T("candle"));
